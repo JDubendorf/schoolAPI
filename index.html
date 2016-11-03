@@ -1,0 +1,119 @@
+<!DOCTYPE html> 
+<html lang="en"> 
+<head>
+	<meta charset="UTF-8">
+	<title>School API</title>
+	<script
+	  src="https://code.jquery.com/jquery-3.1.1.min.js"
+	  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+	  crossorigin="anonymous"></script>
+</head>
+<body>
+	
+	<h3>Hello Fitzroy, and welcome to your Canine University online profile!</h3>
+	<p>Canine University Class List</p>
+	<div id="classes">
+	</div>
+	<br>
+	<p>Your Current Classes</p>
+	<div id="scheduleDiv">
+	</div>
+	<br>
+	<p>Add a class to your schedule</p>
+	<button id="addClass" onclick="addClass()">Add A Class</button>
+	<input id="inputClass" type="text">
+	<br>
+	<p>Your Grades</p>
+	<div id="gradesDiv">
+	</div>
+	<br>
+	<p>Your Homework Status</p>
+	<div id="homeworkDiv">
+	</div>
+	<br>
+	<p>Update Homework Status</p>
+	<p>I've completed the homework for <input id="inputHomework" type="text">.</p>
+	<button id="updateHomework" onclick="changeHomeworkStatus()">Submit</button>
+
+
+
+	<script>
+
+		function getClasses() {
+            $.get("/classes", function(response) {
+            	var conv = JSON.parse(response);
+            	console.log(response);    
+            	$('#classes').text("");
+                for (var each of conv) {
+                	$('#classes').append("<li>" + each.name + "</li>");
+                }
+            });
+        }
+
+        getClasses();
+
+       	function getSchedule() {
+			$.get("/schedule", function(response) {
+				$("#scheduleDiv").text("");
+				var conv = JSON.parse(response);
+				for (var each of conv) {
+					if (each.taking) {
+						$("#scheduleDiv").append("<li>" + each.name + "</li>");
+					}
+				}
+			});
+		}
+
+		getSchedule();
+
+		function addClass () {
+			var newClass = $("#inputClass").val();
+			$.post("/addClass", newClass, function(response){
+				getSchedule();
+				getGrades();
+				getHomework();
+			});
+		}
+
+		function getGrades() {
+			$.get("/getGrades", function(response) {
+				$("#gradesDiv").text("");
+				var conv = JSON.parse(response);
+				for (var each of conv) {
+					if (each.taking) {
+						$("#gradesDiv").append("<li>" + each.name + " : " + each.grade + "</li>");
+					}
+				}
+			});
+		}
+
+		getGrades();
+
+		function getHomework () {
+			$.get("/getHomework", function(response) {
+				$("#homeworkDiv").text("");
+				var conv = JSON.parse(response);
+				for (var each of conv) {
+					if (each.taking) {
+						$("#homeworkDiv").append("<li>" + each.name + " : " + each.homework + "</li>");
+					}
+				}
+			});
+		}
+
+		getHomework();
+
+		function changeHomeworkStatus () {
+			var newHome = $("#inputHomework").val();
+			$.post("/updateHomework", newHome, function(response) {
+				getGrades();
+				getHomework();
+			});
+		}
+
+
+
+	</script>
+
+</body>
+</html>
